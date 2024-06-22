@@ -1,0 +1,72 @@
+# Research Project: Analysis of Fish Length Data Using Bootstrap Methods
+library(ggplot2)
+
+# Set seed for reproducibility
+set.seed(12345)
+
+# Read the data
+data <- read.csv("Salmon_Sample_6_24.csv")
+colnames(data)
+head(data)
+
+
+# Sample Statistics
+mean_length <- mean(data$Fish_Length_cm)
+mean_length
+sd_length <- sd(data$Fish_Length_cm)
+sd_length
+var_length <- var(data$Fish_Length_cm)
+var_length
+
+
+# Bootstrap sampling for mean and standard deviation estimation
+fish_lengths <- data$Fish_Length_cm
+# Number of bootstrap samples
+num_samples <- 500
+bootstrap_means <- numeric(num_samples)
+bootstrap_sds <- numeric(num_samples)
+# Bootstrap sampling
+for (i in 1:num_samples) {
+  bootstrap_sample <- sample(fish_lengths, length(fish_lengths), replace = TRUE)
+  bootstrap_means[i] <- mean(bootstrap_sample)
+  bootstrap_sds[i] <- sd(bootstrap_sample)
+}
+# Bootstrap approximations
+E_X_bar <- mean(bootstrap_means)
+E_X_bar
+V_X_bar <- var(bootstrap_means)
+V_X_bar
+E_S <- mean(bootstrap_sds)
+E_S
+V_S <- var(bootstrap_sds)
+V_S
+
+
+# Bias estimation
+original_mean <- mean(fish_lengths)
+original_sd <- sd(fish_lengths)
+Bias_X_bar_mu <- E_X_bar - original_mean
+Bias_X_bar_mu
+Bias_S_sigma <- E_S - original_sd
+Bias_S_sigma
+
+# Confidence Interval 
+num_samples <- 25000
+bootstrap_means <- numeric(num_samples)
+bootstrap_sds <- numeric(num_samples)
+# Perform bootstrap sampling
+for (i in 1:num_samples) {
+  bootstrap_sample <- sample(fish_lengths, length(fish_lengths), replace = TRUE)
+  bootstrap_means[i] <- mean(bootstrap_sample)
+  bootstrap_sds[i] <- sd(bootstrap_sample)
+}
+alpha_5 <- 0.05
+alpha_12 <- 0.12
+ci_5 <- quantile(bootstrap_means, c(alpha_5 / 2, 1 - alpha_5 / 2))
+ci_12 <- quantile(bootstrap_means, c(alpha_12 / 2, 1 - alpha_12 / 2))
+cat("a) 5% CI for mean =", "(", round(ci_5[1], 2), ",", round(ci_5[2], 2), ")\n")
+cat("b) 12% CI for mean =", "(", round(ci_12[1], 2), ",", round(ci_12[2], 2), ")\n")
+
+# Histogram
+hist(bootstrap_means, breaks = 50, main = "Histogram of Bootstrap Sample Means",
+     xlab = "Bootstrap Sample Mean", col = "lightblue", border = "black")
